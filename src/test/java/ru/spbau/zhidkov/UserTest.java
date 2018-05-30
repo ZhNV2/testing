@@ -23,6 +23,7 @@ public class UserTest {
     private final static String URL = "http://localhost:8080";
     private final static User ROOT = new User("root", "root");
     private final static int MAX_LOGIN_LEN = 50;
+    private final static int MAX_USERS = 10;
 
     private final static By EXCLAMATION_POINT_SELECTOR = By.className("error-bulb2");
     private final static By MESSAGE_ERROR_SELECTOR = By.className("message error");
@@ -105,6 +106,37 @@ public class UserTest {
         testErrorScenario(new User("user ", "password"), this::waitForMessageError);
     }
 
+    @Test
+    public void testAlreadyRegistered() {
+        testErrorScenario(ROOT, this::waitForMessageError);
+    }
+
+    @Test
+    public void testPasswordAndConfirmationDoesNotMatch() {
+        final UserPage userPage = new UserPage(driver);
+        userPage.openCreationDialog();
+        final CreateUserDialog createUserDialog = new CreateUserDialog(driver);
+        createUserDialog.setLogin("login");
+        createUserDialog.setPassword("pass1");
+        createUserDialog.confirmPassword("pass2");
+        createUserDialog.createUser();
+        waitForExclamationPoint();
+    }
+
+    @Test
+    public void testCreateMaximumNumberOfUsers() {
+        final UserPage userPage = new UserPage(driver);
+        final MainPage mainPage = new MainPage(driver);
+
+        for (int i = 0; i < MAX_USERS - 1; i++) {
+            userPage.createUser(new User("user" + i, "pass"));
+            wait.until(ExpectedConditions.urlContains("editUser"));
+            mainPage.selectFromAdministrationMenu(AdministrationDropdownItem.USERS);
+        }
+        for (int i = 0; i < MAX_USERS - 1; i++) {
+            userPage.deleteUser("user" + i);
+        }
+    }
 
     private void testDefaultScenario(User user) {
         final UserPage userPage = new UserPage(driver);

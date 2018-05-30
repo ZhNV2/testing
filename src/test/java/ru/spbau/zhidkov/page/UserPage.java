@@ -29,6 +29,11 @@ public class UserPage extends AbstractAdminPage {
         createUserDialog.createUser();
     }
 
+    public void openCreationDialog() {
+        final WebElement createUserBtn = wait.until(ExpectedConditions.visibilityOfElementLocated(CREATE_USER_SELECTOR));
+        createUserBtn.click();
+    }
+
     public boolean containsUser(String login) {
         return usersTable.contains(login);
     }
